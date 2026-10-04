@@ -1,0 +1,105 @@
+{
+  "model_name": "logistic_regression_baseline",
+  "trained_at": "2026-10-04T13:57:58.905739+00:00",
+  "app_version": "1.0.0",
+  "dataset": "IBM Telco Customer Churn",
+  "train_samples": 4578,
+  "val_samples": 1056,
+  "test_samples": 1409,
+  "class_imbalance_ratio": 2.77,
+  "primary_metrics": {
+    "accuracy": 0.7495,
+    "precision": 0.5184,
+    "recall": 0.7914,
+    "f1_score": 0.6265,
+    "roc_auc": 0.8464,
+    "pr_auc": 0.6753
+  },
+  "confusion_matrix": {
+    "true_negative": 760,
+    "false_positive": 275,
+    "false_negative": 78,
+    "true_positive": 296
+  },
+  "global_feature_importance": [
+    {
+      "feature": "Contract_Two year",
+      "title": "Two-Year Long-Term Contract",
+      "importance": 0.0743
+    },
+    {
+      "feature": "Contract_Month-to-month",
+      "title": "Month-to-Month Contract",
+      "importance": 0.0694
+    },
+    {
+      "feature": "tenure",
+      "title": "Customer Tenure (0 months)",
+      "importance": 0.0665
+    },
+    {
+      "feature": "bill_shock_indicator",
+      "title": "Recent Monthly Bill Spike",
+      "importance": 0.0393
+    },
+    {
+      "feature": "InternetService_Fiber optic",
+      "title": "Fiber Optic High-Speed Internet",
+      "importance": 0.0337
+    },
+    {
+      "feature": "PaperlessBilling_No",
+      "title": "Paper Billing",
+      "importance": 0.0334
+    },
+    {
+      "feature": "InternetService_DSL",
+      "title": "DSL Internet Service",
+      "importance": 0.0322
+    },
+    {
+      "feature": "MonthlyCharges",
+      "title": "Monthly Charges ($0.00)",
+      "importance": 0.0308
+    },
+    {
+      "feature": "tenure_cohort_0-12m",
+      "title": "Early Lifecycle Cohort (0-12m)",
+      "importance": 0.0303
+    },
+    {
+      "feature": "MultipleLines_No",
+      "title": "Multiplelines No",
+      "importance": 0.0266
+    },
+    {
+      "feature": "OnlineSecurity_No",
+      "title": "No Online Security Service",
+      "importance": 0.0264
+    },
+    {
+      "feature": "OnlineSecurity_Yes",
+      "title": "Active Online Security Protection",
+      "importance": 0.0249
+    },
+    {
+      "feature": "PaperlessBilling_Yes",
+      "title": "Paperless Billing Enrolled",
+      "importance": 0.0248
+    },
+    {
+      "feature": "SeniorCitizen_0",
+      "title": "Seniorcitizen 0",
+      "importance": 0.0227
+    },
+    {
+      "feature": "fiber_without_tech_support_0",
+      "title": "Fiber Without Tech Support 0",
+      "importance": 0.022
+    }
+  ],
+  "risk_thresholds": {
+    "low_max": 0.35,
+    "high_min": 0.65
+  }
+}

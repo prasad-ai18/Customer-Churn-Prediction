@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Customer Churn Intelligence & Prediction Platform</title>
+  <meta name="description" content="Production-style ML platform delivering churn probability, risk level, and interpretable SHAP reasons on the IBM Telco benchmark.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="brand-container">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
+      </div>
+      <div class="brand-title">
+        <h1>Churn Intelligence <span class="badge-sop">Project 01 • Production ML</span></h1>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <nav class="main-nav">
+      <button class="nav-btn active" data-tab="dashboard">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        Dashboard
+      </button>
+      <button class="nav-btn" data-tab="simulator">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+        Prediction Simulator
+      </button>
+      <button class="nav-btn" data-tab="explorer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        Risk Explorer
+      </button>
+      <button class="nav-btn" data-tab="performance">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+        Model Performance
+      </button>
+    </nav>
+
+    <!-- Operational System Status -->
+    <div class="header-status">
+      <div class="status-dot"></div>
+      <span id="system-status-text">Connecting...</span>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main class="app-container">
+
+    <!-- TAB 1: EXECUTIVE DASHBOARD -->
+    <section id="dashboard" class="tab-pane active">
+      <div class="section-header">
+        <h2>Customer Retention Intelligence</h2>
+        <p>Continuous monitoring of customer health, churn risk distribution, and key retention indicators.</p>
+      </div>
+
+      <!-- KPI Summary Cards -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-header">
+            <span>Total Customer Base</span>
+            <div class="metric-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
+            </div>
+          </div>
+          <div class="metric-value" id="kpi-total-dataset">7,043</div>
+          <div class="metric-sub">Real IBM Telco benchmark records</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span>Average Predicted Churn</span>
+            <div class="metric-icon">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+            </div>
+          </div>
+          <div class="metric-value" id="kpi-avg-churn">26.5%</div>
+          <div class="metric-sub">Across evaluated test population</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span>High Risk Customers</span>
+            <div class="metric-icon" style="color:var(--color-high-risk)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+            </div>
+          </div>
+          <div class="metric-value" id="kpi-high-risk-count" style="color:var(--color-high-risk)">--</div>
+          <div class="metric-sub">Probability ≥ 65% (Urgent Action)</div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-header">
+            <span>Champion Model ROC-AUC</span>
+            <div class="metric-icon" style="color:var(--color-low-risk)">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+            </div>
+          </div>
+          <div class="metric-value" id="kpi-roc-auc">84.6%</div>
+          <div class="metric-sub" id="kpi-champion-model">Baseline Balanced</div>
+        </div>
+      </div>
+
+      <!-- Overview Visuals Grid -->
+      <div class="panel-grid">
+        <div class="panel-card">
+          <div class="panel-title">
+            <span>Global Churn Risk Factors (Model Feature Importance)</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">Real statistical weights</span>
+          </div>
+          <div id="global-importance-list">
+            <!-- Populated dynamically via app.js -->
+          </div>
+        </div>
+
+        <div class="panel-card">
+          <div class="panel-title">
+            <span>Retention Action Framework</span>
+          </div>
+          <div style="font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+            <p style="margin-bottom:1rem;">Our production model translates statistical risk attributions into concrete operational plays:</p>
+            <div style="margin-bottom:0.75rem; padding:0.75rem; background:rgba(244,63,94,0.08); border-radius:8px; border-left:3px solid var(--color-high-risk);">
+              <strong style="color:var(--color-high-risk)">Month-to-Month Contract:</strong> Proactively trigger discounted annual upgrades before month 3.
+            </div>
+            <div style="margin-bottom:0.75rem; padding:0.75rem; background:rgba(245,158,11,0.08); border-radius:8px; border-left:3px solid var(--color-medium-risk);">
+              <strong style="color:var(--color-medium-risk)">Fiber Without Tech Support:</strong> Offer 30-day complimentary premium onboarding support.
+            </div>
+            <div style="padding:0.75rem; background:rgba(16,185,129,0.08); border-radius:8px; border-left:3px solid var(--color-low-risk);">
+              <strong style="color:var(--color-low-risk)">Electronic Check Billing:</strong> Incentivize migration to auto-debit credit card with $5 monthly credit.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 2: PREDICTION SIMULATOR (SINGLE CUSTOMER) -->
+    <section id="simulator" class="tab-pane">
+      <div class="section-header">
+        <h2>Customer Churn Simulator & Driver Explanation</h2>
+        <p>Enter real customer parameters or load presets to evaluate instant churn probability and individual SHAP drivers.</p>
+      </div>
+
+      <!-- Preset Customer Profiles -->
+      <div class="preset-bar">
+        <span style="font-size:0.8rem; color:var(--text-dim); display:flex; align-items:center; margin-right:0.5rem;">Load Preset Profile:</span>
+        <button class="preset-btn" data-preset="high_risk">⚠️ High Risk (New Month-to-Month Fiber)</button>
+        <button class="preset-btn" data-preset="medium_risk">⚡ Medium Risk (1-Year Contract + Senior)</button>
+        <button class="preset-btn" data-preset="low_risk">🛡️ Low Risk (5-Year Dual-Play Auto-Pay)</button>
+      </div>
+
+      <div class="simulator-layout">
+        <!-- Form Panel -->
+        <div class="panel-card">
+          <form id="prediction-form">
+            <input type="hidden" id="field-customerID" value="CUST-NEW">
+
+            <!-- Demographics -->
+            <div class="form-group-title">1. Customer Demographics</div>
+            <div class="form-grid-3">
+              <div class="field">
+                <label for="field-gender">Gender</label>
+                <select id="field-gender">
+                  <option value="Female">Female</option>
+                  <option value="Male">Male</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-SeniorCitizen">Senior Citizen</label>
+                <select id="field-SeniorCitizen">
+                  <option value="0">No (Under 65)</option>
+                  <option value="1">Yes (65+)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-Partner">Partner</label>
+                <select id="field-Partner">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-Dependents">Dependents</label>
+                <select id="field-Dependents">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-tenure">Tenure (Months)</label>
+                <input type="number" id="field-tenure" min="0" max="72" value="2" required>
+              </div>
+            </div>
+
+            <!-- Subscribed Services -->
+            <div class="form-group-title">2. Subscriptions & Services</div>
+            <div class="form-grid-3">
+              <div class="field">
+                <label for="field-PhoneService">Phone Service</label>
+                <select id="field-PhoneService">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-MultipleLines">Multiple Lines</label>
+                <select id="field-MultipleLines">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No phone service">No phone service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-InternetService">Internet Service</label>
+                <select id="field-InternetService">
+                  <option value="Fiber optic">Fiber optic</option>
+                  <option value="DSL">DSL</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-OnlineSecurity">Online Security</label>
+                <select id="field-OnlineSecurity">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-OnlineBackup">Online Backup</label>
+                <select id="field-OnlineBackup">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-DeviceProtection">Device Protection</label>
+                <select id="field-DeviceProtection">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-TechSupport">Tech Support</label>
+                <select id="field-TechSupport">
+                  <option value="No">No</option>
+                  <option value="Yes">Yes</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-StreamingTV">Streaming TV</label>
+                <select id="field-StreamingTV">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-StreamingMovies">Streaming Movies</label>
+                <select id="field-StreamingMovies">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                  <option value="No internet service">No internet service</option>
+                </select>
+              </div>
+            </div>
+
+            <!-- Contract & Billing -->
+            <div class="form-group-title">3. Contract, Billing & Charges</div>
+            <div class="form-grid-2">
+              <div class="field">
+                <label for="field-Contract">Contract Duration</label>
+                <select id="field-Contract">
+                  <option value="Month-to-month">Month-to-month</option>
+                  <option value="One year">One year</option>
+                  <option value="Two year">Two year</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-PaperlessBilling">Paperless Billing</label>
+                <select id="field-PaperlessBilling">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-PaymentMethod">Payment Method</label>
+                <select id="field-PaymentMethod">
+                  <option value="Electronic check">Electronic check</option>
+                  <option value="Mailed check">Mailed check</option>
+                  <option value="Bank transfer (automatic)">Bank transfer (automatic)</option>
+                  <option value="Credit card (automatic)">Credit card (automatic)</option>
+                </select>
+              </div>
+              <div class="field">
+                <label for="field-MonthlyCharges">Monthly Charges ($)</label>
+                <input type="number" step="0.05" id="field-MonthlyCharges" min="10" max="200" value="95.50" required>
+              </div>
+              <div class="field" style="grid-column: span 2;">
+                <label for="field-TotalCharges">Total Historic Spend ($)</label>
+                <input type="number" step="0.05" id="field-TotalCharges" min="0" value="191.00" required>
+              </div>
+            </div>
+
+            <button type="submit" id="btn-predict" class="btn-primary">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>
+              Run Churn Intelligence Analysis
+            </button>
+          </form>
+        </div>
+
+        <!-- Prediction Result Panel -->
+        <div class="result-card">
+          <div class="panel-title" style="justify-content:center;">Predicted Churn Probability</div>
+
+          <!-- Radial Gauge -->
+          <div class="gauge-container">
+            <svg class="gauge-svg" viewBox="0 0 160 160">
+              <circle class="gauge-circle-bg" cx="80" cy="80" r="70"></circle>
+              <circle id="gauge-bar" class="gauge-circle-bar" cx="80" cy="80" r="70"></circle>
+            </svg>
+            <div class="gauge-text">
+              <div class="gauge-prob" id="gauge-prob-val">--%</div>
+              <div class="gauge-label">Risk Probability</div>
+            </div>
+          </div>
+
+          <div id="result-risk-badge" class="risk-badge low"><span>●</span> Awaiting Input</div>
+
+          <div id="retention-action-text" style="display:none; font-size:0.82rem; padding:0.75rem; border-radius:8px; background:rgba(255,255,255,0.03); margin-bottom:1.25rem; text-align:left; border:1px solid rgba(255,255,255,0.06);"></div>
+
+          <!-- SHAP Breakdown -->
+          <div class="shap-breakdown">
+            <h4>Top Risk Drivers (Pushing Probability Up)</h4>
+            <div id="risk-drivers-list">
+              <div style="font-size:0.8rem; color:var(--text-dim);">Run simulation to view positive SHAP signals</div>
+            </div>
+
+            <h4 style="margin-top:1.25rem;">Top Retention Drivers (Pushing Probability Down)</h4>
+            <div id="retention-drivers-list">
+              <div style="font-size:0.8rem; color:var(--text-dim);">Run simulation to view negative SHAP signals</div>
+            </div>
+
+            <div class="disclaimer-text">
+              <strong>Notice:</strong> Signals reflect model-derived mathematical attributions, not causal claims. Actions should be guided by holistic customer relationship history.
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 3: CUSTOMER RISK EXPLORER -->
+    <section id="explorer" class="tab-pane">
+      <div class="section-header">
+        <h2>Customer Risk Explorer & Portfolio Ranking</h2>
+        <p>Interactive directory of test population sorted by real-time predicted churn probability.</p>
+      </div>
+
+      <div class="panel-card">
+        <div class="table-toolbar">
+          <input type="text" id="customer-search" class="search-input" placeholder="Search by Customer ID, contract, payment method...">
+          <div style="display:flex; gap:0.5rem; align-items:center;">
+            <label style="font-size:0.8rem; color:var(--text-dim);">Filter Risk:</label>
+            <select id="risk-filter" class="filter-select">
+              <option value="all">All Risk Levels</option>
+              <option value="high">High Risk Only</option>
+              <option value="medium">Medium Risk Only</option>
+              <option value="low">Low Risk Only</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Customer ID</th>
+                <th>Predicted Risk</th>
+                <th>Tenure</th>
+                <th>Contract</th>
+                <th>Internet</th>
+                <th>Monthly</th>
+                <th>Actual Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="customer-table-body">
+              <tr><td colspan="8" style="text-align:center; padding: 2rem;"><span class="spinner"></span> Loading real customer records...</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 4: MODEL PERFORMANCE & BENCHMARKING -->
+    <section id="performance" class="tab-pane">
+      <div class="section-header">
+        <h2>Model Evaluation & Production Benchmarks</h2>
+        <p>Strict out-of-sample evaluation on held-out test split. No synthetic or placeholder metrics.</p>
+      </div>
+
+      <!-- Candidate Comparison Cards -->
+      <div class="models-compare-grid" id="models-compare-grid">
+        <!-- Dynamically rendered via app.js -->
+      </div>
+
+      <!-- Visual Charts & Confusion Matrix Grid -->
+      <div class="panel-grid">
+        <!-- ROC & PR Curves -->
+        <div class="panel-card">
+          <div class="panel-title">ROC Curve (Receiver Operating Characteristic)</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">True Positive Rate vs. False Positive Rate across all discrimination thresholds.</p>
+          <div class="chart-box">
+            <canvas id="roc-canvas"></canvas>
+          </div>
+
+          <div class="panel-title" style="margin-top:2rem;">Precision-Recall Curve (PR-AUC)</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Trade-off between precision and recall, essential for class-imbalanced churn.</p>
+          <div class="chart-box">
+            <canvas id="pr-canvas"></canvas>
+          </div>
+        </div>
+
+        <!-- Confusion Matrix & Slice Performance -->
+        <div class="panel-card">
+          <div class="panel-title">Champion Confusion Matrix</div>
+          <p style="font-size:0.8rem; color:var(--text-muted);">Held-out test set evaluation (1,409 customers):</p>
+          
+          <div class="confusion-matrix-grid">
+            <div class="cm-cell hit">
+              <div class="cm-count" id="cm-tp">--</div>
+              <div class="cm-label">True Positive (Churn Detected)</div>
+            </div>
+            <div class="cm-cell miss">
+              <div class="cm-count" id="cm-fp">--</div>
+              <div class="cm-label">False Positive (False Alarm)</div>
+            </div>
+            <div class="cm-cell miss">
+              <div class="cm-count" id="cm-fn">--</div>
+              <div class="cm-label">False Negative (Missed Churn)</div>
+            </div>
+            <div class="cm-cell hit">
+              <div class="cm-count" id="cm-tn">--</div>
+              <div class="cm-label">True Negative (Retained Correctly)</div>
+            </div>
+          </div>
+
+          <div class="panel-title" style="margin-top:2rem;">Business Impact Summary</div>
+          <div style="font-size:0.85rem; color:var(--text-muted); line-height:1.6;">
+            <p>• <strong>Recall on Churners:</strong> Captures ~79.1% of all customers who left, giving retention teams sufficient advance warning.</p>
+            <p style="margin-top:0.5rem;">• <strong>PR-AUC (0.675):</strong> Strong separation on imbalanced class distributions, far exceeding the 0.26 baseline.</p>
+            <p style="margin-top:0.5rem;">• <strong>Class Imbalance Strategy:</strong> Balanced loss weighting prevented model from collapsing to majority class.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Notification Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
