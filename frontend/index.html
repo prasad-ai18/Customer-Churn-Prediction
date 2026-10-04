@@ -34,13 +34,17 @@
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         Dashboard
       </button>
-      <button class="nav-btn" data-tab="simulator">
+      <button class="nav-btn" data-tab="prediction">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-        Prediction Simulator
+        Customer Prediction
       </button>
-      <button class="nav-btn" data-tab="explorer">
+      <button class="nav-btn" data-tab="risk-analysis">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-        Risk Explorer
+        Customer Risk Analysis
+      </button>
+      <button class="nav-btn" data-tab="explanation">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"></path><polyline points="3.27 6.96 12 12.01 20.73 6.96"></polyline><line x1="12" y1="22.08" x2="12" y2="12"></line></svg>
+        Prediction Explanation
       </button>
       <button class="nav-btn" data-tab="performance">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
@@ -144,11 +148,11 @@
       </div>
     </section>
 
-    <!-- TAB 2: PREDICTION SIMULATOR (SINGLE CUSTOMER) -->
-    <section id="simulator" class="tab-pane">
+    <!-- TAB 2: CUSTOMER PREDICTION -->
+    <section id="prediction" class="tab-pane">
       <div class="section-header">
-        <h2>Customer Churn Simulator & Driver Explanation</h2>
-        <p>Enter real customer parameters or load presets to evaluate instant churn probability and individual SHAP drivers.</p>
+        <h2>Customer Churn Prediction Simulator</h2>
+        <p>Enter real customer parameters or load presets to evaluate instant churn probability, risk tier, and initial signals.</p>
       </div>
 
       <!-- Preset Customer Profiles -->
@@ -357,15 +361,19 @@
             <div class="disclaimer-text">
               <strong>Notice:</strong> Signals reflect model-derived mathematical attributions, not causal claims. Actions should be guided by holistic customer relationship history.
             </div>
+
+            <button type="button" class="btn-primary" style="margin-top:1.25rem; width:100%; font-size:0.82rem; padding:0.65rem 1rem; background:rgba(99,102,241,0.2); border:1px solid var(--accent-primary);" onclick="switchTab('explanation')">
+              Deep Dive: SHAP Waterfall & What-If Simulation →
+            </button>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TAB 3: CUSTOMER RISK EXPLORER -->
-    <section id="explorer" class="tab-pane">
+    <!-- TAB 3: CUSTOMER RISK ANALYSIS -->
+    <section id="risk-analysis" class="tab-pane">
       <div class="section-header">
-        <h2>Customer Risk Explorer & Portfolio Ranking</h2>
+        <h2>Customer Risk Analysis & Portfolio Ranking</h2>
         <p>Interactive directory of test population sorted by real-time predicted churn probability.</p>
       </div>
 
@@ -405,7 +413,108 @@
       </div>
     </section>
 
-    <!-- TAB 4: MODEL PERFORMANCE & BENCHMARKING -->
+    <!-- TAB 4: PREDICTION EXPLANATION (SHAP & COUNTERFACTUAL WHAT-IF) -->
+    <section id="explanation" class="tab-pane">
+      <div class="section-header">
+        <h2>SHAP Explainability & Factor Attribution</h2>
+        <p>Mathematical decomposition of model output into positive risk factors and negative retention drivers.</p>
+      </div>
+
+      <!-- Active Customer Context Banner -->
+      <div class="explanation-header-card">
+        <div class="explanation-header-info">
+          <div style="font-size:0.78rem; text-transform:uppercase; color:var(--text-dim); letter-spacing:0.05em; font-weight:700;">Analyzed Customer Profile</div>
+          <div style="font-size:1.15rem; font-weight:700; color:var(--text-main);" id="expl-cust-id">CUST-NEW</div>
+          <div style="font-size:0.82rem; color:var(--text-muted);" id="expl-cust-subtitle">Tenure: 2 mos • Contract: Month-to-month • Internet: Fiber optic</div>
+        </div>
+        <div style="display:flex; align-items:center; gap:1.25rem;">
+          <div style="text-align:right;">
+            <div style="font-size:0.75rem; color:var(--text-dim);">Predicted Probability</div>
+            <div style="font-size:1.4rem; font-weight:800;" id="expl-cust-prob">95.5%</div>
+          </div>
+          <div id="expl-cust-badge" class="risk-badge high">High Risk</div>
+        </div>
+      </div>
+
+      <div class="panel-grid">
+        <!-- Visual Waterfall / Feature Attribution Chart -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <span>Local SHAP Contribution Waterfall</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">Marginal impact on log-odds</span>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-muted); margin-bottom:1rem;">
+            Crimson bars push customer risk <strong>up</strong> toward churn. Emerald bars push customer risk <strong>down</strong> toward retention.
+          </p>
+          <div id="shap-waterfall-container" class="explanation-waterfall">
+            <!-- Dynamically populated via app.js -->
+          </div>
+        </div>
+
+        <!-- Actionable Counterfactual Interventions -->
+        <div class="panel-card">
+          <div class="panel-title">
+            <span>Counterfactual Intervention Playbook</span>
+            <span style="font-size:0.75rem; color:var(--text-muted); font-weight:normal;">What-If simulation</span>
+          </div>
+          <p style="font-size:0.82rem; color:var(--text-muted);">
+            Test retention levers for this customer in real time and observe immediate risk mitigation:
+          </p>
+
+          <div class="counterfactual-grid">
+            <div class="cf-card">
+              <div>
+                <div class="cf-title">Migrate to 1-Year Contract</div>
+                <div class="cf-desc">Upgrading from month-to-month eliminates the single largest churn risk signal in the Telco dataset.</div>
+              </div>
+              <button class="cf-btn" onclick="applyCounterfactual('contract_1yr')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Apply & Recalculate
+              </button>
+            </div>
+
+            <div class="cf-card">
+              <div>
+                <div class="cf-title">Add Premium Tech Support</div>
+                <div class="cf-desc">Provides technical peace-of-mind and breaks the high-friction fiber-without-support pattern.</div>
+              </div>
+              <button class="cf-btn" onclick="applyCounterfactual('add_tech_support')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Apply & Recalculate
+              </button>
+            </div>
+
+            <div class="cf-card">
+              <div>
+                <div class="cf-title">Add Online Security Suite</div>
+                <div class="cf-desc">Protective security bundles drive digital stickiness and lower churn probability significantly.</div>
+              </div>
+              <button class="cf-btn" onclick="applyCounterfactual('add_security')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Apply & Recalculate
+              </button>
+            </div>
+
+            <div class="cf-card">
+              <div>
+                <div class="cf-title">Switch to Auto-Pay (Bank Transfer)</div>
+                <div class="cf-desc">Eliminates billing friction from manual monthly electronic checks with $5 billing incentive.</div>
+              </div>
+              <button class="cf-btn" onclick="applyCounterfactual('switch_autopay')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                Apply & Recalculate
+              </button>
+            </div>
+          </div>
+
+          <div class="disclaimer-text" style="margin-top:1.5rem;">
+            <strong>Compliance Note:</strong> Counterfactual adjustments simulate model responses under modified attribute assumptions. Actual customer behavior may be subject to unobserved external factors.
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- TAB 5: MODEL PERFORMANCE & BENCHMARKING -->
     <section id="performance" class="tab-pane">
       <div class="section-header">
         <h2>Model Evaluation & Production Benchmarks</h2>

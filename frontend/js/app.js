@@ -117,6 +117,11 @@ function switchTab(tabId) {
   if (tabId === "performance" && appState.metrics) {
     renderCharts();
   }
+
+  // Refresh explanation tab when switching to explanation
+  if (tabId === "explanation" && appState.latestPrediction) {
+    renderExplanationTab(appState.latestPrediction, appState.latestCustomer);
+  }
 }
 
 // Fetch Initial Platform Metadata, Metrics & Customers
@@ -151,6 +156,9 @@ async function loadPlatformData() {
       renderCustomerTable();
       populateDashboardAggregates(appState.customers);
     }
+
+    // 5. Initial real prediction run for simulator & explanation
+    await runPrediction();
 
   } catch (err) {
     console.error("Error loading platform data:", err);
@@ -293,7 +301,10 @@ async function runPrediction() {
     }
 
     const result = await res.json();
+    appState.latestPrediction = result;
+    appState.latestCustomer = payload;
     renderPredictionResult(result);
+    renderExplanationTab(result, payload);
   } catch (err) {
     console.error("Prediction error:", err);
     showToast("Error running prediction: " + err.message);
@@ -432,9 +443,100 @@ window.inspectCustomer = function(customerID) {
   if (!cust) return;
 
   fillForm(cust);
-  switchTab("simulator");
+  switchTab("prediction");
   runPrediction();
-  showToast(`Loaded customer ${customerID} into Simulator`);
+  showToast(`Loaded customer ${customerID} into Prediction Simulator`);
+};
+
+// Render Detailed SHAP Explanation Tab
+function renderExplanationTab(res, custData) {
+  if (!res || !res.explanation) return;
+
+  const idEl = document.getElementById("expl-cust-id");
+  if (idEl) idEl.textContent = custData?.customerID || "CUST-SIMULATED";
+
+  const subEl = document.getElementById("expl-cust-subtitle");
+  if (subEl && custData) {
+    const monthlyFormatted = typeof custData.MonthlyCharges === "number" ? custData.MonthlyCharges.toFixed(2) : custData.MonthlyCharges;
+    subEl.textContent = `Tenure: ${custData.tenure} mos • Contract: ${custData.Contract} • Internet: ${custData.InternetService} • Monthly: $${monthlyFormatted}`;
+  }
+
+  const probEl = document.getElementById("expl-cust-prob");
+  if (probEl) probEl.textContent = `${(res.churn_probability * 100).toFixed(1)}%`;
+
+  const badgeEl = document.getElementById("expl-cust-badge");
+  if (badgeEl) {
+    badgeEl.className = `risk-badge ${res.risk_level.toLowerCase()}`;
+    badgeEl.textContent = `${res.risk_level} Risk`;
+  }
+
+  const container = document.getElementById("shap-waterfall-container");
+  if (!container) return;
+  container.innerHTML = "";
+
+  const riskDrivers = res.explanation.top_risk_drivers || [];
+  const retDrivers = res.explanation.top_retention_drivers || [];
+
+  // Determine max absolute impact to normalize bar widths
+  let maxImpact = 0.01;
+  riskDrivers.forEach(d => { if (Math.abs(d.impact) > maxImpact) maxImpact = Math.abs(d.impact); });
+  retDrivers.forEach(d => { if (Math.abs(d.impact) > maxImpact) maxImpact = Math.abs(d.impact); });
+
+  // Render positive risk drivers (pushing churn probability up)
+  riskDrivers.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "waterfall-row";
+    const barPct = Math.min(100, Math.max(14, (Math.abs(d.impact) / maxImpact) * 100));
+    row.innerHTML = `
+      <div class="waterfall-label" title="${d.title}">${d.title}</div>
+      <div class="waterfall-track">
+        <div class="waterfall-bar risk" style="width: ${barPct}%;">+${d.impact.toFixed(3)}</div>
+      </div>
+      <div class="waterfall-val risk">+${d.impact.toFixed(3)}</div>
+    `;
+    container.appendChild(row);
+  });
+
+  // Render negative retention drivers (pushing churn probability down)
+  retDrivers.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "waterfall-row";
+    const barPct = Math.min(100, Math.max(14, (Math.abs(d.impact) / maxImpact) * 100));
+    row.innerHTML = `
+      <div class="waterfall-label" title="${d.title}">${d.title}</div>
+      <div class="waterfall-track">
+        <div class="waterfall-bar retention" style="width: ${barPct}%;">${d.impact.toFixed(3)}</div>
+      </div>
+      <div class="waterfall-val retention">${d.impact.toFixed(3)}</div>
+    `;
+    container.appendChild(row);
+  });
+}
+
+// Interactive Counterfactual Simulator
+window.applyCounterfactual = async function(type) {
+  let changeDesc = "";
+  if (type === "contract_1yr") {
+    const el = document.getElementById("field-Contract");
+    if (el) el.value = "One year";
+    changeDesc = "Contract upgraded to 1-Year";
+  } else if (type === "add_tech_support") {
+    const el = document.getElementById("field-TechSupport");
+    if (el) el.value = "Yes";
+    changeDesc = "Tech Support added";
+  } else if (type === "add_security") {
+    const el = document.getElementById("field-OnlineSecurity");
+    if (el) el.value = "Yes";
+    changeDesc = "Online Security suite added";
+  } else if (type === "switch_autopay") {
+    const el = document.getElementById("field-PaymentMethod");
+    if (el) el.value = "Bank transfer (automatic)";
+    changeDesc = "Payment converted to Auto-Bank Transfer";
+  }
+
+  showToast(`Simulating: ${changeDesc}...`);
+  await runPrediction();
+  showToast(`Applied ${changeDesc}! Churn risk recalculated.`);
 };
 
 // Model Performance Tab

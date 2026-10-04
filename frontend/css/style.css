@@ -817,3 +817,150 @@ table.data-table tr:hover td {
     padding: 1rem;
   }
 }
+
+/* Prediction Explanation & SHAP Visualizer Styles */
+.explanation-header-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-card);
+  border: 1px solid var(--bg-card-border);
+  border-radius: var(--radius-md);
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 1.5rem;
+  backdrop-filter: blur(12px);
+}
+
+.explanation-header-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.explanation-waterfall {
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+  margin-top: 1.25rem;
+}
+
+.waterfall-row {
+  display: grid;
+  grid-template-columns: 240px 1fr 100px;
+  align-items: center;
+  gap: 1rem;
+  font-size: 0.82rem;
+}
+
+.waterfall-label {
+  color: var(--text-main);
+  font-weight: 500;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.waterfall-track {
+  height: 22px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 4px;
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.waterfall-bar {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.waterfall-bar.risk {
+  background: linear-gradient(90deg, #f43f5e 0%, #fb7185 100%);
+  color: #fff;
+}
+
+.waterfall-bar.retention {
+  background: linear-gradient(90deg, #10b981 0%, #34d399 100%);
+  color: #022c22;
+}
+
+.waterfall-val {
+  font-family: monospace;
+  font-size: 0.8rem;
+  text-align: right;
+  font-weight: 600;
+}
+
+.waterfall-val.risk {
+  color: var(--color-high-risk);
+}
+
+.waterfall-val.retention {
+  color: var(--color-low-risk);
+}
+
+/* Counterfactual Simulator Cards */
+.counterfactual-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.cf-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: var(--radius-sm);
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 0.75rem;
+  transition: var(--transition);
+}
+
+.cf-card:hover {
+  border-color: var(--accent-primary);
+  background: rgba(99, 102, 241, 0.04);
+}
+
+.cf-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.cf-desc {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.cf-btn {
+  background: rgba(99, 102, 241, 0.15);
+  border: 1px solid rgba(99, 102, 241, 0.4);
+  color: #a5b4fc;
+  padding: 0.4rem 0.85rem;
+  border-radius: 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.cf-btn:hover {
+  background: var(--accent-primary);
+  color: #fff;
+  border-color: var(--accent-primary);
+}
+
