@@ -116,3 +116,43 @@ def test_customers_sample_endpoint():
     assert "customers" in data
     assert len(data["customers"]) == 10
     assert "predicted_churn_prob" in data["customers"][0]
+
+def test_cors_headers_present():
+    headers = {
+        "Origin": "http://localhost:3000",
+        "Access-Control-Request-Method": "POST"
+    }
+    res = client.options("/predict", headers=headers)
+    assert res.status_code == 200
+    assert "access-control-allow-origin" in res.headers
+    assert res.headers["access-control-allow-origin"] in ["http://localhost:3000", "*"]
+
+def test_predict_endpoint_numeric_validation_error():
+    # Negative tenure and negative monthly charges should fail validation with 422
+    payload = {
+        "gender": "Female",
+        "SeniorCitizen": 0,
+        "Partner": "No",
+        "Dependents": "No",
+        "tenure": -5,  # Invalid: ge=0 required
+        "PhoneService": "Yes",
+        "MultipleLines": "No",
+        "InternetService": "Fiber optic",
+        "OnlineSecurity": "No",
+        "OnlineBackup": "No",
+        "DeviceProtection": "No",
+        "TechSupport": "No",
+        "StreamingTV": "No",
+        "StreamingMovies": "No",
+        "Contract": "Month-to-month",
+        "PaperlessBilling": "Yes",
+        "PaymentMethod": "Electronic check",
+        "MonthlyCharges": -20.0,  # Invalid: ge=0.0 required
+        "TotalCharges": 50.0
+    }
+    res = client.post("/predict", json=payload)
+    assert res.status_code == 422
+    errors = res.json()["detail"]
+    fields_with_errors = [e["loc"][-1] for e in errors]
+    assert "tenure" in fields_with_errors
+    assert "MonthlyCharges" in fields_with_errors
