@@ -31,19 +31,41 @@ _metadata: Optional[Dict[str, Any]] = None
 _comparison: Optional[Dict[str, Any]] = None
 
 def get_pipeline() -> ChurnPipeline:
-    """Retrieve or load cached inference pipeline."""
+    """Retrieve or load cached inference pipeline with robust serverless path resolution."""
     global _pipeline, _explainer, _metadata, _comparison
     if _pipeline is not None:
         return _pipeline
 
-    pipeline_path = settings.MODEL_ARTIFACTS_DIR / "best_churn_pipeline.joblib"
-    metadata_path = settings.MODEL_ARTIFACTS_DIR / "model_metadata.json"
-    comparison_path = settings.MODEL_ARTIFACTS_DIR / "all_models_comparison.json"
+    import os
+
+    candidate_pipeline_paths = [
+        settings.MODEL_ARTIFACTS_DIR / "best_churn_pipeline.joblib",
+        Path(__file__).resolve().parent.parent.parent / "artifacts" / "models" / "best_churn_pipeline.joblib",
+        Path("artifacts/models/best_churn_pipeline.joblib")
+    ]
+    pipeline_path = next((p for p in candidate_pipeline_paths if p.exists()), candidate_pipeline_paths[0])
+
+    candidate_meta_paths = [
+        settings.MODEL_ARTIFACTS_DIR / "model_metadata.json",
+        Path(__file__).resolve().parent.parent.parent / "artifacts" / "models" / "model_metadata.json",
+        Path("artifacts/models/model_metadata.json")
+    ]
+    metadata_path = next((p for p in candidate_meta_paths if p.exists()), candidate_meta_paths[0])
+
+    candidate_comp_paths = [
+        settings.MODEL_ARTIFACTS_DIR / "all_models_comparison.json",
+        Path(__file__).resolve().parent.parent.parent / "artifacts" / "models" / "all_models_comparison.json",
+        Path("artifacts/models/all_models_comparison.json")
+    ]
+    comparison_path = next((p for p in candidate_comp_paths if p.exists()), candidate_comp_paths[0])
 
     if not pipeline_path.exists():
-        logger.warning("Pipeline artifact not found. Triggering automated model training...")
-        from src.models.trainer import train_all_models
-        train_all_models()
+        if not (os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")):
+            logger.warning("Pipeline artifact not found. Triggering automated model training...")
+            from src.models.trainer import train_all_models
+            train_all_models()
+        else:
+            raise ModelNotLoadedError(f"Model artifact not found at {pipeline_path} in serverless environment.")
 
     try:
         _pipeline = joblib.load(pipeline_path)
@@ -205,9 +227,20 @@ def get_sample_customers(limit: int = Query(50, ge=1, le=200), search: Optional[
     Return real customer records from the test split with actual labels and pre-calculated risk score.
     Used for customer table risk explorer and quick demonstration.
     """
-    test_csv = settings.DATA_PROCESSED_DIR / "test.csv"
+    candidate_test_paths = [
+        settings.DATA_PROCESSED_DIR / "test.csv",
+        Path(__file__).resolve().parent.parent.parent / "data" / "processed" / "test.csv",
+        Path("data/processed/test.csv")
+    ]
+    test_csv = next((p for p in candidate_test_paths if p.exists()), candidate_test_paths[0])
+
     if not test_csv.exists():
-        raw_csv = settings.DATA_RAW_PATH
+        candidate_raw_paths = [
+            settings.DATA_RAW_PATH,
+            Path(__file__).resolve().parent.parent.parent / "data" / "raw" / "telco_churn.csv",
+            Path("data/raw/telco_churn.csv")
+        ]
+        raw_csv = next((p for p in candidate_raw_paths if p.exists()), candidate_raw_paths[0])
         if not raw_csv.exists():
             raise HTTPException(status_code=404, detail="Processed test data not found.")
         df = pd.read_csv(raw_csv)

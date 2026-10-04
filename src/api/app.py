@@ -77,8 +77,11 @@ def create_app() -> FastAPI:
     app.include_router(api_router)
 
     # Serve static frontend files if directory exists
-    FRONTEND_DIR.mkdir(parents=True, exist_ok=True)
-    app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
+    try:
+        if FRONTEND_DIR.exists():
+            app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")
+    except Exception as e:
+        logger.warning(f"Static frontend mounting skipped: {e}")
 
     return app
 

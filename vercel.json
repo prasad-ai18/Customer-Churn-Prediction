@@ -1,0 +1,63 @@
+{
+  "version": 2,
+  "functions": {
+    "api/index.py": {
+      "includeFiles": "{artifacts/**,data/processed/**,frontend/**}",
+      "maxDuration": 30
+    }
+  },
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/predict(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/health(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/model-info(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/metrics(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/customers(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/docs(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/openapi.json(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/redoc(.*)",
+      "destination": "/api/index.py"
+    },
+    {
+      "source": "/css/(.*)",
+      "destination": "/frontend/css/$1"
+    },
+    {
+      "source": "/js/(.*)",
+      "destination": "/frontend/js/$1"
+    },
+    {
+      "source": "/",
+      "destination": "/frontend/index.html"
+    },
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
+  ]
+}

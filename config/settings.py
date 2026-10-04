@@ -42,11 +42,17 @@ class Settings(BaseSettings):
     )
 
     def ensure_directories(self) -> None:
-        """Create necessary project directories if they do not exist."""
-        self.DATA_RAW_PATH.parent.mkdir(parents=True, exist_ok=True)
-        self.DATA_PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
-        self.MODEL_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
-        self.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+        """Create necessary project directories if they do not exist and filesystem is writable."""
+        import os
+        if os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME"):
+            return
+        try:
+            self.DATA_RAW_PATH.parent.mkdir(parents=True, exist_ok=True)
+            self.DATA_PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+            self.MODEL_ARTIFACTS_DIR.mkdir(parents=True, exist_ok=True)
+            self.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+        except (OSError, PermissionError):
+            pass
 
     def get_risk_level(self, probability: float) -> str:
         """Categorize churn probability into business risk tier."""

@@ -23,15 +23,17 @@ def setup_logger(name: str = "churn_intelligence") -> logging.Logger:
     console_handler.setFormatter(formatter)
     logger.addHandler(console_handler)
 
-    # File Handler
-    try:
-        settings.LOGS_DIR.mkdir(parents=True, exist_ok=True)
-        log_file = settings.LOGS_DIR / "app.log"
-        file_handler = logging.FileHandler(log_file, encoding="utf-8")
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-    except Exception as e:
-        logger.warning(f"Could not initialize file log handler: {e}")
+    # File Handler (only if not in serverless environment)
+    import os
+    if not (os.environ.get("VERCEL") or os.environ.get("AWS_LAMBDA_FUNCTION_NAME")):
+        try:
+            settings.LOGS_DIR.mkdir(parents=True, exist_ok=True)
+            log_file = settings.LOGS_DIR / "app.log"
+            file_handler = logging.FileHandler(log_file, encoding="utf-8")
+            file_handler.setFormatter(formatter)
+            logger.addHandler(file_handler)
+        except (OSError, PermissionError, Exception):
+            pass
 
     logger.propagate = False
     return logger
