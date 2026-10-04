@@ -1,4 +1,5 @@
 # Customer Churn Intelligence & Prediction Platform
+website URL: https://customer-churn-prediction-2-cy6w.onrender.com/
 
 A production-ready machine learning platform that predicts customer churn, categorizes churn risk levels (`Low`, `Medium`, `High`), and provides actionable local SHAP feature attributions and counterfactual what-if simulations for every customer.
 
