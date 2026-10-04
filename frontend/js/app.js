@@ -85,11 +85,151 @@ const PRESETS = {
 };
 
 // Initialize Application
-document.addEventListener("DOMContentLoaded", async () => {
+document.addEventListener("DOMContentLoaded", () => {
+  initTheme();
   initNavigation();
   initFormHandlers();
-  await loadPlatformData();
+  checkAuth();
 });
+
+// Theme Management (Bright & Dark Mode)
+window.toggleTheme = function() {
+  const current = document.documentElement.getAttribute("data-theme") || "light";
+  const next = (current === "light") ? "dark" : "light";
+  applyTheme(next);
+};
+
+function initTheme() {
+  const saved = localStorage.getItem("churn_theme") || "light";
+  applyTheme(saved);
+}
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute("data-theme", theme);
+  localStorage.setItem("churn_theme", theme);
+
+  const sunIcon = document.getElementById("theme-icon-sun");
+  const moonIcon = document.getElementById("theme-icon-moon");
+  const toggleBtn = document.getElementById("theme-toggle");
+
+  if (theme === "dark") {
+    if (sunIcon) sunIcon.style.display = "block";
+    if (moonIcon) moonIcon.style.display = "none";
+    if (toggleBtn) toggleBtn.setAttribute("title", "Switch to Bright Mode");
+  } else {
+    if (sunIcon) sunIcon.style.display = "none";
+    if (moonIcon) moonIcon.style.display = "block";
+    if (toggleBtn) toggleBtn.setAttribute("title", "Switch to Dark Mode");
+  }
+
+  // If currently on performance tab, re-render curves with new theme palette
+  if (appState.activeTab === "performance" && appState.metrics) {
+    renderCharts();
+  }
+}
+
+// Authentication & Demo Users
+const DEMO_USERS = {
+  alex: {
+    email: "alex.turner@telecom.ai",
+    name: "Alex Turner",
+    role: "Retention Lead",
+    avatar: "AT"
+  },
+  sarah: {
+    email: "sarah.chen@telecom.ai",
+    name: "Sarah Chen",
+    role: "Data Scientist",
+    avatar: "SC"
+  }
+};
+
+window.fillDemoLogin = function(userKey) {
+  const u = DEMO_USERS[userKey];
+  if (!u) return;
+  const emailInput = document.getElementById("login-email");
+  const pwdInput = document.getElementById("login-password");
+  if (emailInput) emailInput.value = u.email;
+  if (pwdInput) pwdInput.value = "demo2026";
+  showToast(`Loaded ${u.name} credentials`);
+};
+
+window.handleLoginSubmit = function(event) {
+  if (event) event.preventDefault();
+
+  const emailInput = document.getElementById("login-email");
+  const email = (emailInput?.value || "").trim().toLowerCase();
+
+  let user = Object.values(DEMO_USERS).find(u => u.email.toLowerCase() === email);
+  if (!user) {
+    user = {
+      email: email || "user@telecom.ai",
+      name: email ? email.split("@")[0].replace(".", " ").replace(/\b\w/g, l => l.toUpperCase()) : "Guest Analyst",
+      role: "Operations Analyst",
+      avatar: email ? email.substring(0, 2).toUpperCase() : "GA"
+    };
+  }
+
+  const btn = document.getElementById("btn-login-submit");
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner"></span> Signing in...`;
+  }
+
+  setTimeout(() => {
+    localStorage.setItem("churn_auth_user", JSON.stringify(user));
+    unlockDashboard(user);
+    showToast(`Welcome back, ${user.name}!`);
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"></path><polyline points="10 17 15 12 10 7"></polyline><line x1="15" y1="12" x2="3" y2="12"></line></svg> Sign In to Platform`;
+    }
+  }, 350);
+};
+
+window.handleSignOut = function() {
+  localStorage.removeItem("churn_auth_user");
+  const appView = document.getElementById("app-view");
+  const loginView = document.getElementById("login-view");
+  if (appView) appView.style.display = "none";
+  if (loginView) loginView.style.display = "flex";
+  showToast("You have been signed out.");
+};
+
+function checkAuth() {
+  const saved = localStorage.getItem("churn_auth_user");
+  if (saved) {
+    try {
+      const user = JSON.parse(saved);
+      unlockDashboard(user);
+      return true;
+    } catch (e) {
+      localStorage.removeItem("churn_auth_user");
+    }
+  }
+  // Show login view by default
+  const appView = document.getElementById("app-view");
+  const loginView = document.getElementById("login-view");
+  if (appView) appView.style.display = "none";
+  if (loginView) loginView.style.display = "flex";
+  return false;
+}
+
+function unlockDashboard(user) {
+  const appView = document.getElementById("app-view");
+  const loginView = document.getElementById("login-view");
+  if (loginView) loginView.style.display = "none";
+  if (appView) appView.style.display = "flex";
+
+  const nameEl = document.getElementById("header-user-name");
+  const roleEl = document.getElementById("header-user-role");
+  const avatarEl = document.getElementById("header-user-avatar");
+  if (nameEl) nameEl.textContent = user.name;
+  if (roleEl) roleEl.textContent = user.role;
+  if (avatarEl) avatarEl.textContent = user.avatar;
+
+  loadPlatformData();
+}
 
 // Tab Navigation
 function initNavigation() {
@@ -594,7 +734,7 @@ function renderCharts() {
       m.roc_curve.tpr,
       "False Positive Rate",
       "True Positive Rate",
-      "#6366f1",
+      "#0284c7",
       true
     );
   }
@@ -617,6 +757,9 @@ function drawCurve(canvasId, xVals, yVals, xLabel, yLabel, color, isRoc = false)
   const canvas = document.getElementById(canvasId);
   if (!canvas || !xVals || !yVals) return;
 
+  const currentTheme = document.documentElement.getAttribute("data-theme") || "light";
+  const isLight = currentTheme === "light";
+
   const ctx = canvas.getContext("2d");
   const width = canvas.width = canvas.parentElement.clientWidth;
   const height = canvas.height = canvas.parentElement.clientHeight;
@@ -632,7 +775,7 @@ function drawCurve(canvasId, xVals, yVals, xLabel, yLabel, color, isRoc = false)
   const plotH = height - padTop - padBottom;
 
   // Draw Grid Lines
-  ctx.strokeStyle = "rgba(255, 255, 255, 0.06)";
+  ctx.strokeStyle = isLight ? "rgba(14, 165, 233, 0.12)" : "rgba(255, 255, 255, 0.08)";
   ctx.lineWidth = 1;
   ctx.beginPath();
   for (let i = 0; i <= 4; i++) {
@@ -648,7 +791,7 @@ function drawCurve(canvasId, xVals, yVals, xLabel, yLabel, color, isRoc = false)
 
   // If ROC, draw baseline diagonal (random classifier = 0.5)
   if (isRoc) {
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.25)";
+    ctx.strokeStyle = isLight ? "rgba(14, 165, 233, 0.35)" : "rgba(255, 255, 255, 0.25)";
     ctx.setLineDash([4, 4]);
     ctx.beginPath();
     ctx.moveTo(padLeft, height - padBottom);
@@ -671,7 +814,7 @@ function drawCurve(canvasId, xVals, yVals, xLabel, yLabel, color, isRoc = false)
   ctx.stroke();
 
   // Draw Axis Labels
-  ctx.fillStyle = "#64748b";
+  ctx.fillStyle = isLight ? "#475569" : "#94a3b8";
   ctx.font = "10px Inter, sans-serif";
   ctx.fillText("0.0", padLeft - 20, height - padBottom + 4);
   ctx.fillText("1.0", padLeft - 20, padTop + 8);
