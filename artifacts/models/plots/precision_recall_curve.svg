@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <text x="200" y="30" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Precision-Recall Curve - logistic_regression_baseline</text>
+  <text x="200" y="50" text-anchor="middle" fill="#94a3b8" font-size="12">PR-AUC (Avg Precision): 0.6753</text>
+  <!-- Grid -->
+  <line x1="40" y1="40" x2="40" y2="340" stroke="#334155" stroke-width="1"/>
+  <line x1="40" y1="340" x2="360" y2="340" stroke="#334155" stroke-width="1"/>
+  <!-- PR Polyline -->
+  <polyline fill="none" stroke="#10b981" stroke-width="3" points="40.0,40.0 40.0,40.0 50.3,82.9 71.6,62.5 93.1,62.4 110.2,78.3 120.4,94.8 130.7,100.9 148.7,109.1 155.5,125.7 167.5,125.1 183.7,127.3 197.4,133.3 205.1,138.2 213.7,144.2 224.8,148.3 235.9,149.7 245.3,154.9 250.5,161.3 261.6,164.6 267.6,168.8 275.3,172.3 277.9,175.2 284.7,178.1 289.8,182.4 295.8,186.7 296.7,189.3 302.7,191.9 308.7,193.7 310.4,197.7 317.2,201.7 320.6,203.3 324.9,205.9 328.4,208.4 333.5,211.7 337.8,214.4 340.3,217.7 342.0,221.5 343.7,225.1 348.9,226.7 351.5,230.0 353.2,233.0 354.0,236.4 355.7,239.3 356.6,243.6 357.4,248.7 359.1,257.8 359.1,253.1 360.0,260.4 360.0,260.4" />
+  <!-- Labels -->
+  <text x="40" y="360" fill="#64748b" font-size="11">0.0</text>
+  <text x="360" y="360" fill="#64748b" font-size="11" text-anchor="end">1.0</text>
+  <text x="25" y="45" fill="#64748b" font-size="11">1.0</text>
+  <text x="200" y="380" text-anchor="middle" fill="#94a3b8" font-size="12">Recall (Sensitivity)</text>
+  <text x="15" y="190" text-anchor="middle" fill="#94a3b8" font-size="12" transform="rotate(-90 15,190)">Precision</text>
+</svg>

@@ -172,3 +172,116 @@ def evaluate_predictions(
         pr_curve_data=pr_curve,
         slice_analysis=slice_results
     )
+
+
+def save_evaluation_plots(metrics: EvaluationMetrics, global_importances: List[Dict[str, Any]], output_dir: Any) -> None:
+    """Save clean, standalone SVG visual artifacts for ROC, PR, Confusion Matrix, and Feature Importance."""
+    from pathlib import Path
+    out = Path(output_dir)
+    out.mkdir(parents=True, exist_ok=True)
+
+    # 1. ROC Curve SVG
+    fprs = metrics.roc_curve_data.get("fpr", [])
+    tprs = metrics.roc_curve_data.get("tpr", [])
+    if fprs and tprs:
+        pts = " ".join([f"{40 + f * 320:.1f},{340 - t * 300:.1f}" for f, t in zip(fprs, tprs)])
+        roc_svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <text x="200" y="30" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">ROC Curve - {metrics.model_name}</text>
+  <text x="200" y="50" text-anchor="middle" fill="#94a3b8" font-size="12">ROC-AUC: {metrics.roc_auc:.4f}</text>
+  <!-- Grid -->
+  <line x1="40" y1="40" x2="40" y2="340" stroke="#334155" stroke-width="1"/>
+  <line x1="40" y1="340" x2="360" y2="340" stroke="#334155" stroke-width="1"/>
+  <!-- Diagonal Baseline -->
+  <line x1="40" y1="340" x2="360" y2="40" stroke="#475569" stroke-dasharray="4,4" stroke-width="1.5"/>
+  <!-- ROC Polyline -->
+  <polyline fill="none" stroke="#6366f1" stroke-width="3" points="{pts}" />
+  <!-- Labels -->
+  <text x="40" y="360" fill="#64748b" font-size="11">0.0</text>
+  <text x="360" y="360" fill="#64748b" font-size="11" text-anchor="end">1.0</text>
+  <text x="25" y="45" fill="#64748b" font-size="11">1.0</text>
+  <text x="200" y="380" text-anchor="middle" fill="#94a3b8" font-size="12">False Positive Rate (FPR)</text>
+  <text x="15" y="190" text-anchor="middle" fill="#94a3b8" font-size="12" transform="rotate(-90 15,190)">True Positive Rate (TPR)</text>
+</svg>"""
+        (out / "roc_curve.svg").write_text(roc_svg, encoding="utf-8")
+
+    # 2. Precision-Recall Curve SVG
+    recs = metrics.pr_curve_data.get("recall", [])
+    precs = metrics.pr_curve_data.get("precision", [])
+    if recs and precs:
+        pts = " ".join([f"{40 + r * 320:.1f},{340 - p * 300:.1f}" for r, p in zip(recs, precs)])
+        pr_svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <text x="200" y="30" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Precision-Recall Curve - {metrics.model_name}</text>
+  <text x="200" y="50" text-anchor="middle" fill="#94a3b8" font-size="12">PR-AUC (Avg Precision): {metrics.pr_auc:.4f}</text>
+  <!-- Grid -->
+  <line x1="40" y1="40" x2="40" y2="340" stroke="#334155" stroke-width="1"/>
+  <line x1="40" y1="340" x2="360" y2="340" stroke="#334155" stroke-width="1"/>
+  <!-- PR Polyline -->
+  <polyline fill="none" stroke="#10b981" stroke-width="3" points="{pts}" />
+  <!-- Labels -->
+  <text x="40" y="360" fill="#64748b" font-size="11">0.0</text>
+  <text x="360" y="360" fill="#64748b" font-size="11" text-anchor="end">1.0</text>
+  <text x="25" y="45" fill="#64748b" font-size="11">1.0</text>
+  <text x="200" y="380" text-anchor="middle" fill="#94a3b8" font-size="12">Recall (Sensitivity)</text>
+  <text x="15" y="190" text-anchor="middle" fill="#94a3b8" font-size="12" transform="rotate(-90 15,190)">Precision</text>
+</svg>"""
+        (out / "precision_recall_curve.svg").write_text(pr_svg, encoding="utf-8")
+
+    # 3. Confusion Matrix SVG
+    cm = metrics.confusion_matrix
+    tp = cm.get("true_positive", 0)
+    fp = cm.get("false_positive", 0)
+    fn = cm.get("false_negative", 0)
+    tn = cm.get("true_negative", 0)
+    cm_svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 380" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <text x="220" y="35" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Confusion Matrix - {metrics.model_name}</text>
+  <text x="220" y="55" text-anchor="middle" fill="#94a3b8" font-size="12">Total Test Samples: {tp + fp + fn + tn:,}</text>
+  <!-- Headers -->
+  <text x="170" y="90" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold">Pred: Retain</text>
+  <text x="310" y="90" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold">Pred: Churn</text>
+  <text x="25" y="165" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold" transform="rotate(-90 25,165)">Actual: Retain</text>
+  <text x="25" y="275" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold" transform="rotate(-90 25,275)">Actual: Churn</text>
+  <!-- Cells -->
+  <!-- TN -->
+  <rect x="100" y="110" width="140" height="100" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" rx="8"/>
+  <text x="170" y="160" text-anchor="middle" fill="#10b981" font-size="24" font-weight="bold">{tn}</text>
+  <text x="170" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">True Negative</text>
+  <!-- FP -->
+  <rect x="250" y="110" width="140" height="100" fill="rgba(244, 63, 94, 0.12)" stroke="#f43f5e" rx="8"/>
+  <text x="320" y="160" text-anchor="middle" fill="#f43f5e" font-size="24" font-weight="bold">{fp}</text>
+  <text x="320" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">False Positive</text>
+  <!-- FN -->
+  <rect x="100" y="220" width="140" height="100" fill="rgba(244, 63, 94, 0.12)" stroke="#f43f5e" rx="8"/>
+  <text x="170" y="270" text-anchor="middle" fill="#f43f5e" font-size="24" font-weight="bold">{fn}</text>
+  <text x="170" y="295" text-anchor="middle" fill="#94a3b8" font-size="11">False Negative</text>
+  <!-- TP -->
+  <rect x="250" y="220" width="140" height="100" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" rx="8"/>
+  <text x="320" y="270" text-anchor="middle" fill="#10b981" font-size="24" font-weight="bold">{tp}</text>
+  <text x="320" y="295" text-anchor="middle" fill="#94a3b8" font-size="11">True Positive</text>
+</svg>"""
+    (out / "confusion_matrix.svg").write_text(cm_svg, encoding="utf-8")
+
+    # 4. Feature Importance SVG
+    if global_importances:
+        top10 = global_importances[:10]
+        max_v = max([i["importance"] for i in top10], default=0.1)
+        bars_svg = []
+        for idx, item in enumerate(top10):
+            y = 70 + idx * 28
+            w = int((item["importance"] / max_v) * 200)
+            bars_svg.append(f"""
+  <text x="180" y="{y + 14}" text-anchor="end" fill="#e2e8f0" font-size="11">{item.get('title', item['feature'])[:24]}</text>
+  <rect x="190" y="{y}" width="{w}" height="18" fill="url(#grad)" rx="4"/>
+  <text x="{195 + w}" y="{y + 14}" fill="#38bdf8" font-size="11" font-weight="bold">{(item['importance']*100):.1f}%</text>
+""")
+        feat_svg = f"""<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 370" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <text x="225" y="35" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Top 10 Feature Importances</text>
+  {"".join(bars_svg)}
+</svg>"""
+        (out / "feature_importance.svg").write_text(feat_svg, encoding="utf-8")
+

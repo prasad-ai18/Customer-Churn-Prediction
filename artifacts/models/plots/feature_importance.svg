@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 450 370" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <defs>
+    <linearGradient id="grad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6366f1"/>
+      <stop offset="100%" stop-color="#a855f7"/>
+    </linearGradient>
+  </defs>
+  <text x="225" y="35" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Top 10 Feature Importances</text>
+  
+  <text x="180" y="84" text-anchor="end" fill="#e2e8f0" font-size="11">Two-Year Long-Term Contr</text>
+  <rect x="190" y="70" width="200" height="18" fill="url(#grad)" rx="4"/>
+  <text x="395" y="84" fill="#38bdf8" font-size="11" font-weight="bold">7.4%</text>
+
+  <text x="180" y="112" text-anchor="end" fill="#e2e8f0" font-size="11">Month-to-Month Contract</text>
+  <rect x="190" y="98" width="186" height="18" fill="url(#grad)" rx="4"/>
+  <text x="381" y="112" fill="#38bdf8" font-size="11" font-weight="bold">6.9%</text>
+
+  <text x="180" y="140" text-anchor="end" fill="#e2e8f0" font-size="11">Customer Tenure (0 month</text>
+  <rect x="190" y="126" width="179" height="18" fill="url(#grad)" rx="4"/>
+  <text x="374" y="140" fill="#38bdf8" font-size="11" font-weight="bold">6.7%</text>
+
+  <text x="180" y="168" text-anchor="end" fill="#e2e8f0" font-size="11">Recent Monthly Bill Spik</text>
+  <rect x="190" y="154" width="105" height="18" fill="url(#grad)" rx="4"/>
+  <text x="300" y="168" fill="#38bdf8" font-size="11" font-weight="bold">3.9%</text>
+
+  <text x="180" y="196" text-anchor="end" fill="#e2e8f0" font-size="11">Fiber Optic High-Speed I</text>
+  <rect x="190" y="182" width="90" height="18" fill="url(#grad)" rx="4"/>
+  <text x="285" y="196" fill="#38bdf8" font-size="11" font-weight="bold">3.4%</text>
+
+  <text x="180" y="224" text-anchor="end" fill="#e2e8f0" font-size="11">Paper Billing</text>
+  <rect x="190" y="210" width="89" height="18" fill="url(#grad)" rx="4"/>
+  <text x="284" y="224" fill="#38bdf8" font-size="11" font-weight="bold">3.3%</text>
+
+  <text x="180" y="252" text-anchor="end" fill="#e2e8f0" font-size="11">DSL Internet Service</text>
+  <rect x="190" y="238" width="86" height="18" fill="url(#grad)" rx="4"/>
+  <text x="281" y="252" fill="#38bdf8" font-size="11" font-weight="bold">3.2%</text>
+
+  <text x="180" y="280" text-anchor="end" fill="#e2e8f0" font-size="11">Monthly Charges ($0.00)</text>
+  <rect x="190" y="266" width="82" height="18" fill="url(#grad)" rx="4"/>
+  <text x="277" y="280" fill="#38bdf8" font-size="11" font-weight="bold">3.1%</text>
+
+  <text x="180" y="308" text-anchor="end" fill="#e2e8f0" font-size="11">Early Lifecycle Cohort (</text>
+  <rect x="190" y="294" width="81" height="18" fill="url(#grad)" rx="4"/>
+  <text x="276" y="308" fill="#38bdf8" font-size="11" font-weight="bold">3.0%</text>
+
+  <text x="180" y="336" text-anchor="end" fill="#e2e8f0" font-size="11">Multiplelines No</text>
+  <rect x="190" y="322" width="71" height="18" fill="url(#grad)" rx="4"/>
+  <text x="266" y="336" fill="#38bdf8" font-size="11" font-weight="bold">2.7%</text>
+
+</svg>

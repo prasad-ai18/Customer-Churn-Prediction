@@ -106,8 +106,28 @@ def train_all_models(data_bundle: Optional[DataBundle] = None) -> ModelTrainingR
         "random_forest", y_test, test_probs_rf, original_df_slice=data_bundle.test_df
     )
 
-    # Candidate 3: XGBoost (Gradient Boosted Ensemble with Class Weighting)
-    logger.info("Training Candidate 3: XGBoost Gradient Boosted Ensemble...")
+    # Candidate 3: Gradient Boosting
+    logger.info("Training Candidate 3: Gradient Boosting Classifier...")
+    gb_params = {
+        "booster": "gbtree",
+        "learning_rate": 0.08,
+        "max_depth": 3,
+        "subsample": 0.8,
+        "colsample_bytree": 0.8,
+        "objective": "binary:logistic",
+        "eval_metric": "logloss",
+        "random_state": settings.RANDOM_STATE
+    }
+    gb_bst = xgb.train(gb_params, dtrain, num_boost_round=100)
+    p_gb = ChurnPipeline(engineer, transformer, gb_bst, "gradient_boosting", feature_names)
+    pipelines["gradient_boosting"] = p_gb
+    test_probs_gb = p_gb.predict_proba(X_test_raw)[:, 1]
+    all_metrics["gradient_boosting"] = evaluate_predictions(
+        "gradient_boosting", y_test, test_probs_gb, original_df_slice=data_bundle.test_df
+    )
+
+    # Candidate 4: XGBoost (with scale_pos_weight for class imbalance)
+    logger.info("Training Candidate 4: XGBoost Gradient Boosted Ensemble (Class Weighted)...")
     xgb_params = {
         "booster": "gbtree",
         "learning_rate": 0.05,
@@ -128,7 +148,7 @@ def train_all_models(data_bundle: Optional[DataBundle] = None) -> ModelTrainingR
     )
 
     # Model Selection: Prioritize PR-AUC and F1 for churn retention optimization
-    best_name = "xgboost"
+    best_name = "logistic_regression_baseline"
     best_score = -1.0
     for name, metric in all_metrics.items():
         score = (metric.pr_auc * 0.6) + (metric.f1_score * 0.4)
@@ -173,6 +193,8 @@ def train_all_models(data_bundle: Optional[DataBundle] = None) -> ModelTrainingR
     # Save artifacts
     save_dir = settings.MODEL_ARTIFACTS_DIR
     save_dir.mkdir(parents=True, exist_ok=True)
+    plots_dir = save_dir / "plots"
+    plots_dir.mkdir(parents=True, exist_ok=True)
 
     # 1. Unified pipeline
     pipeline_path = save_dir / "best_churn_pipeline.joblib"
@@ -205,6 +227,44 @@ def train_all_models(data_bundle: Optional[DataBundle] = None) -> ModelTrainingR
     with open(comparison_path, "w", encoding="utf-8") as f:
         json.dump(comparison_summary, f, indent=2)
     logger.info(f"Saved models comparison to {comparison_path}")
+
+    # 4. Save visual SVG plots
+    from src.models.evaluator import save_evaluation_plots
+    save_evaluation_plots(all_metrics[best_name], global_importances, plots_dir)
+    logger.info(f"Saved evaluation plots to {plots_dir}")
+
+    # 5. Generate human-readable Markdown Report
+    cm = all_metrics[best_name].confusion_matrix
+    report_md = f"""# Model Training & Evaluation Report
+
+**Trained At**: `{metadata['trained_at']}`
+**Dataset**: `{metadata['dataset']}` (Total Evaluated: {metadata['train_samples'] + metadata['val_samples'] + metadata['test_samples']:,} samples)
+**Class Imbalance Ratio**: Non-churn / Churn = `{metadata['class_imbalance_ratio']}:1`
+
+## 1. Candidate Comparison Benchmark (Held-Out Test Set: {metadata['test_samples']:,} samples)
+
+| Model Architecture | ROC-AUC | PR-AUC | F1-Score | Recall | Precision | Accuracy |
+| :--- | :---: | :---: | :---: | :---: | :---: | :---: |
+"""
+    for name, m in all_metrics.items():
+        is_champ = " ★ Champion" if name == best_name else ""
+        report_md += f"| **{name}{is_champ}** | **{m.roc_auc:.4f}** | **{m.pr_auc:.4f}** | **{m.f1_score:.4f}** | **{m.recall*100:.2f}%** | {m.precision*100:.2f}% | {m.accuracy*100:.2f}% |\n"
+
+    report_md += f"""
+## 2. Champion Model Confusion Matrix ({best_name})
+- **True Positives (Churn Detected)**: {cm['true_positive']:,}
+- **False Positives (False Alarms)**: {cm['false_positive']:,}
+- **False Negatives (Missed Churn)**: {cm['false_negative']:,}
+- **True Negatives (Retained Correctly)**: {cm['true_negative']:,}
+
+## 3. Top Risk Drivers (Global SHAP Feature Importance)
+"""
+    for idx, item in enumerate(global_importances[:10], 1):
+        report_md += f"{idx}. **{item['title']}** (`{item['feature']}`): {item['importance']*100:.2f}%\n"
+
+    report_path = save_dir / "evaluation_report.md"
+    report_path.write_text(report_md, encoding="utf-8")
+    logger.info(f"Saved evaluation report markdown to {report_path}")
 
     return ModelTrainingResult(
         best_model_name=best_name,

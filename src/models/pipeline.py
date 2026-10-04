@@ -71,7 +71,7 @@ class ChurnPipeline:
         df_eng = self.feature_engineer.transform(df)
         df_trans = self.transformer.transform(df_eng)
 
-        if self.model_type in ["xgboost", "random_forest"]:
+        if self.model_type in ["xgboost", "random_forest", "gradient_boosting"]:
             dmat = xgb.DMatrix(df_trans.values, feature_names=self.feature_names)
             p1 = self.model.predict(dmat)
             return np.column_stack([1.0 - p1, p1])

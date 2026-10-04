@@ -28,7 +28,7 @@ class ChurnExplainer:
             X_trans = self.pipeline.transformer.transform(X_eng)
 
             # 2. Extract SHAP values
-            if self.model_type in ["xgboost", "random_forest"]:
+            if self.model_type in ["xgboost", "random_forest", "gradient_boosting"]:
                 # Native XGBoost Tree SHAP calculation
                 dmat = xgb.DMatrix(X_trans.values, feature_names=self.feature_names)
                 contribs = self.model.predict(dmat, pred_contribs=True)
@@ -128,7 +128,7 @@ class ChurnExplainer:
     def get_global_feature_importance(self, top_n: int = 15) -> List[Dict[str, Any]]:
         """Extract global feature importance from the model."""
         importances = []
-        if self.model_type in ["xgboost", "random_forest"]:
+        if self.model_type in ["xgboost", "random_forest", "gradient_boosting"]:
             score_dict = self.model.get_score(importance_type="gain")
             # Fill all features
             total_gain = sum(score_dict.values()) if score_dict else 1.0

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 440 380" width="100%" height="100%" style="background:#0f172a; font-family:sans-serif;">
+  <text x="220" y="35" text-anchor="middle" fill="#f8fafc" font-size="16" font-weight="bold">Confusion Matrix - logistic_regression_baseline</text>
+  <text x="220" y="55" text-anchor="middle" fill="#94a3b8" font-size="12">Total Test Samples: 1,409</text>
+  <!-- Headers -->
+  <text x="170" y="90" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold">Pred: Retain</text>
+  <text x="310" y="90" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold">Pred: Churn</text>
+  <text x="25" y="165" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold" transform="rotate(-90 25,165)">Actual: Retain</text>
+  <text x="25" y="275" text-anchor="middle" fill="#cbd5e1" font-size="13" font-weight="bold" transform="rotate(-90 25,275)">Actual: Churn</text>
+  <!-- Cells -->
+  <!-- TN -->
+  <rect x="100" y="110" width="140" height="100" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" rx="8"/>
+  <text x="170" y="160" text-anchor="middle" fill="#10b981" font-size="24" font-weight="bold">760</text>
+  <text x="170" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">True Negative</text>
+  <!-- FP -->
+  <rect x="250" y="110" width="140" height="100" fill="rgba(244, 63, 94, 0.12)" stroke="#f43f5e" rx="8"/>
+  <text x="320" y="160" text-anchor="middle" fill="#f43f5e" font-size="24" font-weight="bold">275</text>
+  <text x="320" y="185" text-anchor="middle" fill="#94a3b8" font-size="11">False Positive</text>
+  <!-- FN -->
+  <rect x="100" y="220" width="140" height="100" fill="rgba(244, 63, 94, 0.12)" stroke="#f43f5e" rx="8"/>
+  <text x="170" y="270" text-anchor="middle" fill="#f43f5e" font-size="24" font-weight="bold">78</text>
+  <text x="170" y="295" text-anchor="middle" fill="#94a3b8" font-size="11">False Negative</text>
+  <!-- TP -->
+  <rect x="250" y="220" width="140" height="100" fill="rgba(16, 185, 129, 0.15)" stroke="#10b981" rx="8"/>
+  <text x="320" y="270" text-anchor="middle" fill="#10b981" font-size="24" font-weight="bold">296</text>
+  <text x="320" y="295" text-anchor="middle" fill="#94a3b8" font-size="11">True Positive</text>
+</svg>

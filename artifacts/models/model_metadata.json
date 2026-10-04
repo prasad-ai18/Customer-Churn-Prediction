@@ -1,6 +1,6 @@
 {
   "model_name": "logistic_regression_baseline",
-  "trained_at": "2026-10-04T13:57:58.905739+00:00",
+  "trained_at": "2026-10-04T14:13:57.523927+00:00",
   "app_version": "1.0.0",
   "dataset": "IBM Telco Customer Churn",
   "train_samples": 4578,
